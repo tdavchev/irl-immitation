@@ -2,7 +2,6 @@
 import tensorflow as tf
 import numpy as np
 
-
 def max_pool(x, k_sz=[2, 2]):
   """max pooling layer wrapper
   Args

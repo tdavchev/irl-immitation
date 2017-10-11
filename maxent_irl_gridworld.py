@@ -25,7 +25,7 @@ PARSER.set_defaults(rand_start=False)
 PARSER.add_argument('-lr', '--learning_rate', default=0.01, type=float, help='learning rate')
 PARSER.add_argument('-ni', '--n_iters', default=20, type=int, help='number of iterations')
 ARGS = PARSER.parse_args()
-print ARGS
+print(ARGS)
 
 
 GAMMA = ARGS.gamma

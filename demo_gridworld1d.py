@@ -8,6 +8,7 @@ from mdp import value_iteration
 from lp_irl import *
 from maxent_irl import *
 from deep_maxent_irl import *
+from deep_siamese_maxent_irl import *
 
 
 PARSER = argparse.ArgumentParser(description=None)
@@ -22,7 +23,7 @@ PARSER.set_defaults(rand_start=True)
 PARSER.add_argument('-lr', '--learning_rate', default=0.02, type=float, help='learning rate')
 PARSER.add_argument('-ni', '--n_iters', default=20, type=int, help='number of iterations')
 ARGS = PARSER.parse_args()
-print ARGS
+print(ARGS)
 
 
 GAMMA = ARGS.gamma
@@ -74,24 +75,28 @@ def main():
 
 
 def test_irl_algorithms(gw, P_a, rmap_gt, policy_gt, trajs, feat_map):
-  print 'LP IRL training ..'
-  rewards_lpirl = lp_irl(P_a, policy_gt, gamma=0.3, l1=10, R_max=R_MAX)
-  print 'Max Ent IRL training ..'
-  rewards_maxent = maxent_irl(feat_map, P_a, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
-  print 'Deep Max Ent IRL training ..'
-  rewards = deep_maxent_irl(feat_map, P_a, GAMMA, trajs, LEARNING_RATE, N_ITERS)    
+  # print( 'LP IRL training ..')
+  # rewards_lpirl = lp_irl(P_a, policy_gt, gamma=0.3, l1=10, R_max=R_MAX)
+  # print('Max Ent IRL training ..')
+  # rewards_maxent = maxent_irl(feat_map, P_a, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
+  # print('Deep Max Ent IRL training ..')
+  # rewards_fc = deep_maxent_irl(feat_map, P_a, GAMMA, trajs, LEARNING_RATE, N_ITERS)
+  # print('Deep Policy Max Ent IRL training ..')
+  rewards = deep_siamese_maxent_irl(feat_map, P_a, GAMMA, trajs, LEARNING_RATE, N_ITERS)    
   values, _ = value_iteration.value_iteration(P_a, rewards, GAMMA, error=0.01, deterministic=True)
 
   # plots
   plt.figure(figsize=(20,8))
-  plt.subplot(1, 4, 1)
+  plt.subplot(1, 5, 1)
   img_utils.heatmap2d(to_plot(rmap_gt), 'Rewards Map - Ground Truth', block=False, text=False)
-  plt.subplot(1, 4, 2)
+  plt.subplot(1, 5, 2)
   img_utils.heatmap2d(to_plot(rewards_lpirl), 'Reward Map - LP', block=False, text=False)
-  plt.subplot(1, 4, 3)
+  plt.subplot(1, 5, 3)
   img_utils.heatmap2d(to_plot(rewards_maxent), 'Reward Map - Maxent', block=False, text=False)
-  plt.subplot(1, 4, 4)
-  img_utils.heatmap2d(to_plot(rewards), 'Reward Map - Deep Maxent', block=False, text=False)
+  plt.subplot(1, 5, 4)
+  img_utils.heatmap2d(to_plot(rewards_fc), 'Reward Map - Deep Maxent', block=False, text=False)
+  plt.subplot(1, 5, 5)
+  img_utils.heatmap2d(to_plot(rewards), 'Reward Siamese Map - Deep Maxent', block=False, text=False)
   plt.show()
 
 
