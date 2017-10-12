@@ -291,7 +291,7 @@ class Gridworld(object):
 
         return np.array(trajectories)
 
-    def generate_inverse_trajectories(self, n_trajectories, trajectory_length, policy,
+    def generate_inverse_trajectories(self, n_trajectories, trajectory_length, inv_policy,
                                     random_start=False):
         """
         Generate n_trajectories trajectories with length trajectory_length,
@@ -317,8 +317,8 @@ class Gridworld(object):
                     action = self.actions[rn.randint(0, 4)]
                 else:
                     # Follow the given policy.
-                    keep.append(policy(self.point_to_int((sx, sy))))
-                    action = self.actions[policy(self.point_to_int((sx, sy)))]
+                    keep.append(inv_policy(self.point_to_int((sx, sy))))
+                    action = self.actions[inv_policy(self.point_to_int((sx, sy)))]
 
                 if (0 <= sx + action[0] < self.grid_size and
                         0 <= sy + action[1] < self.grid_size):
@@ -331,8 +331,8 @@ class Gridworld(object):
                 state_int = self.point_to_int((sx, sy))
                 action_int = self.actions.index(action)
                 next_state_int = self.point_to_int((next_sx, next_sy))
-                reward = self.inverse_reward(next_state_int)
-                trajectory.append((state_int, action_int, reward))
+                inv_reward = self.inverse_reward(next_state_int)
+                trajectory.append((state_int, action_int, inv_reward))
 
                 sx = next_sx
                 sy = next_sy

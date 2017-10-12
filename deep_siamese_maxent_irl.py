@@ -57,9 +57,11 @@ class DeepIRLP:
       subt = tf.subtract(fc1, fc1_inv)
       # blah = tf.multiply(tf.divide(fc2, fc1_p), 0.35)
       # comb = tf.concat([fc1, fc1_inv], 1)
-      fc_p = tf_utils.fc(subt, 2*self.n_h2, scope="fc_p", activation_fn=tf.nn.elu,
+      fc_p1 = tf_utils.fc(subt, 2*self.n_h1, scope="fc_p1", activation_fn=tf.nn.elu,
         initializer=tf.contrib.layers.variance_scaling_initializer(mode="FAN_IN"))
-      reward = tf_utils.fc(fc_p, 1, scope="reward")
+      # fc_p2 = tf_utils.fc(fc_p1, self.n_h2, scope="fc_p2", activation_fn=tf.nn.elu,
+      #   initializer=tf.contrib.layers.variance_scaling_initializer(mode="FAN_IN"))
+      reward = tf_utils.fc(fc_p1, 1, scope="reward")
     theta = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=name)
     return input_s, input_inv, reward, theta
 

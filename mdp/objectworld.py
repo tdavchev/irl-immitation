@@ -38,6 +38,12 @@ class OWObject(object):
         return "<OWObject (In: {}) (Out: {})>".format(self.inner_colour,
                                                       self.outer_colour)
 
+    def get_inner_colour(self):
+        return self.inner_colour
+
+    def get_outer_colour(self):
+        return self.outer_colour
+
 class Objectworld(Gridworld):
     """
     Objectworld MDP.
@@ -76,7 +82,7 @@ class Objectworld(Gridworld):
 
             self.objects[x, y] = obj
 
-        # self.invert_world()
+        self.invert_world()
         # Preconstruct the transition probability array.
         self.transition_probability = np.array(
             [[[self._transition_probability(i, j, k)
@@ -87,9 +93,9 @@ class Objectworld(Gridworld):
     def invert_world(self):
         for key in self.objects.keys():
             obj = self.point_to_int(key)
-            inv_obj = self.grid_size**2 - obj + 1
+            inv_obj = (self.grid_size**2-1) - obj
             inv_pt = self.int_to_point(inv_obj)
-            self.inverted_objects[inv_pt[0], inv_pt[1]] = self.objects[key]
+            self.inverted_objects[inv_pt[0], inv_pt[1]] = OWObject(self.objects[key].get_inner_colour(), self.objects[key].get_outer_colour())
 
     def feature_vector(self, i, objects, discrete=True):
         """
@@ -153,6 +159,81 @@ class Objectworld(Gridworld):
                 i += 1
 
         return state
+
+    def inv_feature_vector(self, i, objects, discrete=True):
+        """
+        Get the feature vector associated with a state integer.
+
+        i: State int.
+        discrete: Whether the feature vectors should be discrete (default True).
+            bool.
+        -> Feature vector.
+        """
+
+        sx, sy = self.int_to_point(i)
+
+        nearest_inner = {}  # colour: distance
+        nearest_outer = {}  # colour: distance
+
+        for y in range(self.grid_size):
+            for x in range(self.grid_size):
+                if (x, y) in objects:
+                    dist = math.hypot((x - sx), (y - sy))
+                    obj = objects[x, y]
+                    if obj.inner_colour in nearest_inner:
+                        if dist < nearest_inner[obj.inner_colour]:
+                            nearest_inner[obj.inner_colour] = dist
+                    else:
+                        nearest_inner[obj.inner_colour] = dist
+                    if obj.outer_colour in nearest_outer:
+                        if dist < nearest_outer[obj.outer_colour]:
+                            nearest_outer[obj.outer_colour] = dist
+                    else:
+                        nearest_outer[obj.outer_colour] = dist
+
+        # Need to ensure that all colours are represented.
+        for c in range(self.n_colours):
+            if c not in nearest_inner:
+                nearest_inner[c] = 0
+            if c not in nearest_outer:
+                nearest_outer[c] = 0
+
+        if discrete:
+            state = np.zeros((2*self.n_colours*self.grid_size,))
+            i = 0
+            for c in range(self.n_colours):
+                for d in range(1, self.grid_size+1):
+                    if nearest_inner[c] < d:
+                        state[i] = 1
+                    i += 1
+                    if nearest_outer[c] < d:
+                        state[i] = 1
+                    i += 1
+            assert i == 2*self.n_colours*self.grid_size
+            assert (state >= 0).all()
+        else:
+            # Continuous features.
+            state = np.zeros((2*self.n_colours))
+            i = 0
+            for c in range(self.n_colours):
+                state[i] = nearest_inner[c]
+                i += 1
+                state[i] = nearest_outer[c]
+                i += 1
+
+        return state
+
+    def inv_feature_matrix(self, objects, discrete=True):
+        """
+        Get the feature matrix for this objectworld.
+
+        discrete: Whether the feature vectors should be discrete (default True).
+            bool.
+        -> NumPy array with shape (n_states, n_states).
+        """
+
+        return np.array([self.inv_feature_vector(i, objects, discrete)
+                         for i in range(self.n_states)])
 
     def feature_matrix(self, objects, discrete=True):
         """

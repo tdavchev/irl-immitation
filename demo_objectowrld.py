@@ -9,6 +9,7 @@ from mdp import objectworld
 # from mdp import gridworld
 # from mdp import value_iteration
 from value_iterationn import find_policy
+from value_iterationn import find_inverted_policy
 from deep_siamese_maxent_irl import *
 from deep_maxent_irl import *
 from maxent_irl import *
@@ -61,32 +62,32 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
     trajs = ow.generate_trajectories(N_TRAJS, L_TRAJ, lambda s: policy_gt[s])
     feat_map = ow.feature_matrix(ow.objects, discrete=False)
 
-    # rewards_inv = np.array([ow.inverse_reward(s) for s in range(ow.n_states)])
-    # policy_inv = find_policy(ow.n_states, ow.n_actions, ow.transition_probability,
-    #                         rewards_inv, ow.discount, stochastic=False)
-    # trajs_inv = ow.generate_inverse_trajectories(N_TRAJS, L_TRAJ, lambda s: policy_inv[s])
-    # feat_map_inv = ow.feature_matrix(ow.inverted_objects, discrete=False)
-    # print('LP IRL training ..')
-    # rewards_lpirl = lp_irl(ow.transition_probability, policy_gt, gamma=0.3, l1=10, R_max=R_MAX)
-    # print('Max Ent IRL training ..')
-    # rewards_maxent = maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
+    rewards_inv = np.array([ow.inverse_reward(s_inv) for s_inv in range(ow.n_states)])
+    policy_inv = find_inverted_policy(ow.n_states, ow.n_actions, ow.transition_probability,
+                            rewards_inv, ow.discount, stochastic=False)
+    trajs_inv = ow.generate_inverse_trajectories(N_TRAJS, L_TRAJ, lambda s_inv: policy_inv[s_inv])
+    feat_map_inv = ow.inv_feature_matrix(ow.inverted_objects, discrete=False)
+    print('LP IRL training ..')
+    rewards_lpirl = lp_irl(ow.transition_probability, policy_gt, gamma=0.3, l1=10, R_max=R_MAX)
+    print('Max Ent IRL training ..')
+    rewards_maxent = maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
     print('Deep Max Ent IRL training ..')
     rewards_deep = deep_maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE, N_ITERS)
-    # print('Deep Siamese Max Ent IRL training ..')
-    # rewards = deep_siamese_maxent_irl(feat_map, feat_map_inv, ow.transition_probability, GAMMA, trajs, trajs_inv, LEARNING_RATE, N_ITERS)
+    print('Deep Siamese Max Ent IRL training ..')
+    rewards = deep_siamese_maxent_irl(feat_map, feat_map_inv, ow.transition_probability, GAMMA, trajs, trajs_inv, LEARNING_RATE, N_ITERS)
 
     # plots
     plt.figure(figsize=(20,5))
     plt.subplot(1, 5, 1)
     img_utils.heatmap2d(np.reshape(rewards_gt, (H,W), order='F'), 'Rewards Map - Ground Truth', block=False)
-    # plt.subplot(1, 5, 2)
-    # img_utils.heatmap2d(np.reshape(rewards_lpirl, (H,W), order='F'), 'Reward Map - LP', block=False)
-    # plt.subplot(1, 5, 3)
-    # img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Reward Map - Maxent', block=False)
+    plt.subplot(1, 5, 2)
+    img_utils.heatmap2d(np.reshape(rewards_lpirl, (H,W), order='F'), 'Reward Map - LP', block=False)
+    plt.subplot(1, 5, 3)
+    img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Reward Map - Maxent', block=False)
     plt.subplot(1, 5, 4)
     img_utils.heatmap2d(np.reshape(rewards_deep, (H,W), order='F'), 'Reward Map - Deep Maxent', block=False)
-    # plt.subplot(1, 5, 5)
-    # img_utils.heatmap2d(np.reshape(rewards, (H,W), order='F'), 'Reward Map - Deep Policy Maxent', block=False)
+    plt.subplot(1, 5, 5)
+    img_utils.heatmap2d(np.reshape(rewards, (H,W), order='F'), 'Reward Map - Deep Siamese Maxent', block=False)
     plt.show()
 
 
