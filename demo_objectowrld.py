@@ -46,7 +46,7 @@ RAND_START = ARGS.rand_start
 LEARNING_RATE = ARGS.learning_rate
 N_ITERS = ARGS.n_iters
 
-
+# 10, 0.9, 15, 2, 20, 50, 0.01, (3, 3)
 def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
          learning_rate, structure):
 
@@ -56,6 +56,7 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
 
     ow = objectworld.Objectworld(grid_size, n_objects, n_colours, wind,
                                     discount)
+    print(ow.objects.keys())
     rewards_gt = np.array([ow.reward(s) for s in range(ow.n_states)])
     policy_gt = find_policy(ow.n_states, ow.n_actions, ow.transition_probability,
                             rewards_gt, ow.discount, stochastic=False)
