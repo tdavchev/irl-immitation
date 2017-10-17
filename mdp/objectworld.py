@@ -69,6 +69,7 @@ class Objectworld(Gridworld):
         # Generate objects.
         self.objects = {}
         self.inverted_objects = {}
+        # self.wrong_objects = {}
         for _ in range(self.n_objects):
             obj = OWObject(rn.randint(self.n_colours),
                            rn.randint(self.n_colours))
@@ -82,6 +83,19 @@ class Objectworld(Gridworld):
 
             self.objects[x, y] = obj
 
+        # for _ in range(self.n_objects):
+        #     obj = OWObject(rn.randint(self.n_colours),
+        #                    rn.randint(self.n_colours))
+
+        #     while True:
+        #         x = rn.randint(self.grid_size)
+        #         y = rn.randint(self.grid_size)
+
+        #         if (x, y) not in self.inverted_objects:
+        #             break
+
+        #     self.inverted_objects[x, y] = obj
+
         self.invert_world()
         # Preconstruct the transition probability array.
         self.transition_probability = np.array(
@@ -91,11 +105,16 @@ class Objectworld(Gridworld):
              for i in range(self.n_states)])
 
     def invert_world(self):
-        for key in self.objects.keys():
-            obj = self.point_to_int(key)
-            inv_obj = (self.grid_size**2-1) - obj
-            inv_pt = self.int_to_point(inv_obj)
-            self.inverted_objects[inv_pt[0], inv_pt[1]] = OWObject(self.objects[key].get_inner_colour(), self.objects[key].get_outer_colour())
+        for state in range(self.grid_size**2):
+            if self.int_to_point(state) not in self.objects.keys():
+                inv_pt = self.int_to_point(state)
+                self.inverted_objects[inv_pt[0], inv_pt[1]] = OWObject(rn.randint(self.n_colours), rn.randint(self.n_colours))
+
+        # for key in self.objects.keys():
+        #     obj = self.point_to_int(key)
+        #     inv_obj = (self.grid_size**2-1) - obj
+        #     inv_pt = self.int_to_point(inv_obj)
+        #     self.inverted_objects[inv_pt[0], inv_pt[1]] = OWObject(self.objects[key].get_inner_colour(), self.objects[key].get_outer_colour())
 
     def feature_vector(self, i, objects, discrete=True):
         """
@@ -271,10 +290,11 @@ class Objectworld(Gridworld):
                     near_c1 = True
 
         if near_c0 and near_c1:
-            return 1
+            return -1#1
         if near_c0:
-            return -1
-        return 0
+            return 0#-1
+        
+        return 1#0
 
     def inverse_reward(self, state_int):
         """

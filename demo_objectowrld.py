@@ -56,6 +56,8 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
 
     ow = objectworld.Objectworld(grid_size, n_objects, n_colours, wind,
                                     discount)
+    print(ow.objects.keys())
+    print("The objects ^^^")
     rewards_gt = np.array([ow.reward(s) for s in range(ow.n_states)])
     policy_gt = find_policy(ow.n_states, ow.n_actions, ow.transition_probability,
                             rewards_gt, ow.discount, stochastic=False)
@@ -79,15 +81,15 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
     # plots
     plt.figure(figsize=(20,5))
     plt.subplot(1, 5, 1)
-    img_utils.heatmap2d(np.reshape(rewards_gt, (H,W), order='F'), 'Rewards Map - Ground Truth', block=False)
+    img_utils.heatmap2d(np.reshape(rewards_gt, (H,W), order='F'), 'Ground Truth', block=False, text=False)
     plt.subplot(1, 5, 2)
-    img_utils.heatmap2d(np.reshape(rewards_lpirl, (H,W), order='F'), 'Reward Map - LP', block=False)
+    img_utils.heatmap2d(np.reshape(rewards_lpirl, (H,W), order='F'), 'LP', block=False, text=False)
     plt.subplot(1, 5, 3)
-    img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Reward Map - Maxent', block=False)
+    img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Maxent', block=False, text=False)
     plt.subplot(1, 5, 4)
-    img_utils.heatmap2d(np.reshape(rewards_deep, (H,W), order='F'), 'Reward Map - Deep Maxent', block=False)
+    img_utils.heatmap2d(np.reshape(rewards_deep, (H,W), order='F'), 'Deep Maxent', block=False, text=False)
     plt.subplot(1, 5, 5)
-    img_utils.heatmap2d(np.reshape(rewards, (H,W), order='F'), 'Reward Map - Deep Siamese Maxent', block=False)
+    img_utils.heatmap2d(np.reshape(rewards, (H,W), order='F'), 'Deep Siamese Maxent', block=False, text=False)
     plt.show()
 
 

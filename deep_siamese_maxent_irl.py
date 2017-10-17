@@ -54,6 +54,7 @@ class DeepIRLP:
       fc1_inv = tf_utils.fc(fltn_conv_inv, self.n_h2, scope="fc1_inv", activation_fn=tf.nn.elu,
         initializer=tf.contrib.layers.variance_scaling_initializer(mode="FAN_IN"))
 
+      # subt = tf.subtract(fc1, fc1_inv)
       subt = tf.subtract(fc1, fc1_inv)
       # blah = tf.multiply(tf.divide(fc2, fc1_p), 0.35)
       # comb = tf.concat([fc1, fc1_inv], 1)
