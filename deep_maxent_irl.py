@@ -17,7 +17,6 @@ class DeepIRLFC:
     self.n_h1 = n_h1
     self.n_h2 = n_h2
     self.name = name
-    print("TUK SAM !!!!")
 
     self.sess = tf.Session()
     self.input_s, self.reward, self.theta = self._build_network(self.name)
@@ -38,19 +37,24 @@ class DeepIRLFC:
 
 
   def _build_network(self, name):
-    input_s = tf.placeholder(tf.float32, [None, self.n_input])
-    img_in = tf.reshape(input_s, shape=[-1, 1, 4, 1])
+    with tf.name_scope('normal_input'):
+      input_s = tf.placeholder(tf.float32, [None, self.n_input])
+    with tf.name_scope('normal_reshape'):
+      img_in = tf.reshape(input_s, shape=[-1, 1, self.n_input, 1])
     with tf.variable_scope(name):
       cnv1 = tf_utils.conv2d(img_in, 2, (2,2))
       fltn_conv = tf_utils.flatten(cnv1)
       # fc1 = tf_utils.fc(input_s, self.n_h1, scope="fc1", activation_fn=tf.nn.elu,
       #   initializer=tf.contrib.layers.variance_scaling_initializer(mode="FAN_IN"))
-      fc2 = tf_utils.fc(fltn_conv, self.n_h2, scope="fc2", activation_fn=tf.nn.elu,
+      fc2 = tf_utils.fc(fltn_conv, self.n_h2, scope="normal_fc2", activation_fn=tf.nn.elu,
         initializer=tf.contrib.layers.variance_scaling_initializer(mode="FAN_IN"))
-      reward = tf_utils.fc(fc2, 1, scope="reward")
+      reward = tf_utils.fc(fc2, 1, scope="normal_reward")
     theta = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=name)
     return input_s, reward, theta
 
+
+  def reset_graph(self):
+    tf.reset_default_graph()
 
   def get_theta(self):
     return self.sess.run(self.theta)
@@ -91,7 +95,7 @@ def compute_state_visition_freq(P_a, gamma, trajs, policy, deterministic=True):
   mu = np.zeros([N_STATES, T]) 
 
   for traj in trajs:
-    mu[traj[0], 0] += 1
+    mu[traj[0, 0], 0] += 1
   mu[:,0] = mu[:,0]/len(trajs)
 
   for s in range(N_STATES):
@@ -215,6 +219,7 @@ def deep_maxent_irl(feat_map, P_a, gamma, trajs, lr, n_iters):
     
 
   rewards = nn_r.get_rewards(feat_map)
+  nn_r.reset_graph()
   # return sigmoid(normalize(rewards))
   return normalize(rewards)
 

@@ -56,7 +56,10 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
 
     ow = objectworld.Objectworld(grid_size, n_objects, n_colours, wind,
                                     discount)
-    print(ow.objects.keys())
+    for key in ow.objects.keys():
+        print(ow.objects[key])
+        print(key)
+        print("...")
     print("The objects ^^^")
     rewards_gt = np.array([ow.reward(s) for s in range(ow.n_states)])
     policy_gt = find_policy(ow.n_states, ow.n_actions, ow.transition_probability,
@@ -68,13 +71,15 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
     policy_inv = find_inverted_policy(ow.n_states, ow.n_actions, ow.transition_probability,
                             rewards_inv, ow.discount, stochastic=False)
     trajs_inv = ow.generate_inverse_trajectories(N_TRAJS, L_TRAJ, lambda s_inv: policy_inv[s_inv])
-    feat_map_inv = ow.inv_feature_matrix(ow.inverted_objects, discrete=False)
-    print('LP IRL training ..')
-    rewards_lpirl = lp_irl(ow.transition_probability, policy_gt, gamma=0.3, l1=10, R_max=R_MAX)
-    print('Max Ent IRL training ..')
-    rewards_maxent = maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
-    print('Deep Max Ent IRL training ..')
-    rewards_deep = deep_maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE, N_ITERS)
+    # feat_map_inv = ow.inv_feature_matrix(ow.inverted_objects, discrete=False)
+
+    feat_map_inv = ow.feature_matrix(ow.objects, discrete=False)
+    # print('LP IRL training ..')
+    # rewards_lpirl = lp_irl(ow.transition_probability, policy_gt, gamma=0.3, l1=10, R_max=R_MAX)
+    # print('Max Ent IRL training ..')
+    # rewards_maxent = maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
+    # print('Deep Max Ent IRL training ..')
+    # rewards_deep = deep_maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE, N_ITERS)
     print('Deep Siamese Max Ent IRL training ..')
     rewards = deep_siamese_maxent_irl(feat_map, feat_map_inv, ow.transition_probability, GAMMA, trajs, trajs_inv, LEARNING_RATE, N_ITERS)
 
@@ -82,12 +87,12 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
     plt.figure(figsize=(20,5))
     plt.subplot(1, 5, 1)
     img_utils.heatmap2d(np.reshape(rewards_gt, (H,W), order='F'), 'Ground Truth', block=False, text=False)
-    plt.subplot(1, 5, 2)
-    img_utils.heatmap2d(np.reshape(rewards_lpirl, (H,W), order='F'), 'LP', block=False, text=False)
-    plt.subplot(1, 5, 3)
-    img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Maxent', block=False, text=False)
-    plt.subplot(1, 5, 4)
-    img_utils.heatmap2d(np.reshape(rewards_deep, (H,W), order='F'), 'Deep Maxent', block=False, text=False)
+    # plt.subplot(1, 5, 2)
+    # img_utils.heatmap2d(np.reshape(rewards_lpirl, (H,W), order='F'), 'LP', block=False, text=False)
+    # plt.subplot(1, 5, 3)
+    # img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Maxent', block=False, text=False)
+    # plt.subplot(1, 5, 4)
+    # img_utils.heatmap2d(np.reshape(rewards_deep, (H,W), order='F'), 'Deep Maxent', block=False, text=False)
     plt.subplot(1, 5, 5)
     img_utils.heatmap2d(np.reshape(rewards, (H,W), order='F'), 'Deep Siamese Maxent', block=False, text=False)
     plt.show()
@@ -96,4 +101,7 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
 
 
 if __name__ == "__main__":
-    main(10, 0.9, 15, 2, 20, 50, 0.01, (3, 3))
+    if tf.gfile.Exists('/tmp/tensorflow/siamese'):
+        tf.gfile.DeleteRecursively('/tmp/tensorflow/siamese')
+    tf.gfile.MakeDirs('/tmp/tensorflow/siamese')
+    main(10, 0.9, 15, 3, 20, 50, 0.01, (3, 3))

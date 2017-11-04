@@ -69,19 +69,30 @@ class Objectworld(Gridworld):
         # Generate objects.
         self.objects = {}
         self.inverted_objects = {}
-        # self.wrong_objects = {}
-        for _ in range(self.n_objects):
-            obj = OWObject(rn.randint(self.n_colours),
-                           rn.randint(self.n_colours))
+        # # self.wrong_objects = {}
+        # listo = [(6, 9), (5, 3), (2, 1), (5, 4), (7, 9), (9, 5), (2, 8), (2, 3), (4, 3), (7, 7)]
+        # objo = [(1, 1), (1, 1), (1, 0), (0, 1), (0, 1), (0, 1), (0, 1), (0, 0), (0, 1), (0, 1)]
+        # example 3
+        # listo = [(6, 9), (2, 3), (4, 1), (2, 8), (5, 9), (5, 4), (7, 4), (1, 3), (7, 7), (0, 5)]
+        # objo = [(0, 0), (0, 1), (1, 0), (1, 1), (0, 0), (0, 1), (0, 1), (1, 1), (0, 1), (0, 1)]
+        # example 4
+        listo = [(4, 5), (7, 3), (3, 3), (1, 2), (2, 8), (8, 8), (9, 7), (3, 4), (3, 8), (5, 6), (6, 8), (6, 0), (6, 7), (0, 1), (1, 6)]
+        objo = [(2, 1), (2, 0), (1, 1), (1, 0), (0, 0), (0, 0), (1, 0), (2, 0), (2, 0), (0, 2), (0, 2), (0, 1), (1, 2), (2, 0), (0, 2)]
+        for i in range(len(listo)):
+            obj = OWObject(objo[i][0], objo[i][1])
+            self.objects[listo[i][0], listo[i][1]] = obj
+        # for _ in range(self.n_objects):
+        #     obj = OWObject(rn.randint(self.n_colours),
+        #                    rn.randint(self.n_colours))
 
-            while True:
-                x = rn.randint(self.grid_size)
-                y = rn.randint(self.grid_size)
+        #     while True:
+        #         x = rn.randint(self.grid_size)
+        #         y = rn.randint(self.grid_size)
 
-                if (x, y) not in self.objects:
-                    break
+        #         if (x, y) not in self.objects:
+        #             break
 
-            self.objects[x, y] = obj
+        #     self.objects[x, y] = obj
 
         # for _ in range(self.n_objects):
         #     obj = OWObject(rn.randint(self.n_colours),
@@ -105,11 +116,13 @@ class Objectworld(Gridworld):
              for i in range(self.n_states)])
 
     def invert_world(self):
+        # tam kade e s obekt e bez i obratno
         for state in range(self.grid_size**2):
             if self.int_to_point(state) not in self.objects.keys():
                 inv_pt = self.int_to_point(state)
                 self.inverted_objects[inv_pt[0], inv_pt[1]] = OWObject(rn.randint(self.n_colours), rn.randint(self.n_colours))
 
+        # bukvalno obrushtash sveta nadolo s glavata
         # for key in self.objects.keys():
         #     obj = self.point_to_int(key)
         #     inv_obj = (self.grid_size**2-1) - obj
@@ -311,19 +324,49 @@ class Objectworld(Gridworld):
         for (dx, dy) in product(range(-3, 4), range(-3, 4)):
             if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
                 if (abs(dx) + abs(dy) <= 3 and
-                        (x+dx, y+dy) in self.inverted_objects and
-                        self.inverted_objects[x+dx, y+dy].outer_colour == 0):
+                        (x+dx, y+dy) in self.objects and
+                        self.objects[x+dx, y+dy].outer_colour == 0):
                     near_c0 = True
                 if (abs(dx) + abs(dy) <= 2 and
-                        (x+dx, y+dy) in self.inverted_objects and
-                        self.inverted_objects[x+dx, y+dy].outer_colour == 1):
+                        (x+dx, y+dy) in self.objects and
+                        self.objects[x+dx, y+dy].outer_colour == 1):
                     near_c1 = True
 
         if near_c0 and near_c1:
             return 1
         if near_c0:
-            return -1
-        return 0
+            return 0#-1
+        
+        return -1#0
+
+    # def inverse_reward(self, state_int):
+    #     """
+    #     Get the reward for a state int.
+
+    #     state_int: State int.
+    #     -> reward float
+    #     """
+
+    #     x, y = self.int_to_point(state_int)
+
+    #     near_c0 = False
+    #     near_c1 = False
+    #     for (dx, dy) in product(range(-3, 4), range(-3, 4)):
+    #         if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
+    #             if (abs(dx) + abs(dy) <= 3 and
+    #                     (x+dx, y+dy) in self.inverted_objects and
+    #                     self.inverted_objects[x+dx, y+dy].outer_colour == 0):
+    #                 near_c0 = True
+    #             if (abs(dx) + abs(dy) <= 2 and
+    #                     (x+dx, y+dy) in self.inverted_objects and
+    #                     self.inverted_objects[x+dx, y+dy].outer_colour == 1):
+    #                 near_c1 = True
+
+    #     if near_c0 and near_c1:
+    #         return -1#1
+    #     if near_c0:
+    #         return 0#-1
+    #     return 1
 
     def generate_trajectories(self, n_trajectories, trajectory_length, policy):
         """
