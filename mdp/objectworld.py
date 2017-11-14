@@ -76,8 +76,18 @@ class Objectworld(Gridworld):
         # listo = [(6, 9), (2, 3), (4, 1), (2, 8), (5, 9), (5, 4), (7, 4), (1, 3), (7, 7), (0, 5)]
         # objo = [(0, 0), (0, 1), (1, 0), (1, 1), (0, 0), (0, 1), (0, 1), (1, 1), (0, 1), (0, 1)]
         # example 4
-        listo = [(4, 5), (7, 3), (3, 3), (1, 2), (2, 8), (8, 8), (9, 7), (3, 4), (3, 8), (5, 6), (6, 8), (6, 0), (6, 7), (0, 1), (1, 6)]
-        objo = [(2, 1), (2, 0), (1, 1), (1, 0), (0, 0), (0, 0), (1, 0), (2, 0), (2, 0), (0, 2), (0, 2), (0, 1), (1, 2), (2, 0), (0, 2)]
+        # listo = [(4, 5), (7, 3), (3, 3), (1, 2), (2, 8), (8, 8), (9, 7), (3, 4), (3, 8), (5, 6), (6, 8), (6, 0), (6, 7), (0, 1), (1, 6)]
+        # objo = [(2, 1), (2, 0), (1, 1), (1, 0), (0, 0), (0, 0), (1, 0), (2, 0), (2, 0), (0, 2), (0, 2), (0, 1), (1, 2), (2, 0), (0, 2)]
+        # listo = [(0, 0), (1, 0), (3, 0), (4, 0), (7, 0), (8, 0), (9, 0), (10, 0), (11, 0), (12, 0), (13, 0),
+        #          (0, 1), (1,1), (3,1), (4, 1), (5, 1), (1, 2), (3, 2), (4, 2), (4, 3), (9, 4), (8, 5), (9, 5),
+        # #          (5, 6), (6, 6), (7, 6), (8, 6), (9, 6), (6, 5)]
+        # objo = [(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),
+        #         (1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0), (0, 1)]
+        # listo = [(6, 5)]
+        listo = [(3, 3), (9, 10)] # so x goes down the y axis and y goes towards the x axis ...
+
+        
+        objo = [(0, 1), (1, 0)]
         for i in range(len(listo)):
             obj = OWObject(objo[i][0], objo[i][1])
             self.objects[listo[i][0], listo[i][1]] = obj
@@ -288,22 +298,37 @@ class Objectworld(Gridworld):
         """
 
         x, y = self.int_to_point(state_int)
-
         near_c0 = False
         near_c1 = False
+        # for (dx, dy) in product(range(-3, 4), range(-3, 4)):
+        #     if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
+        #         if (abs(dx) + abs(dy) <= 3 and
+        #                 (x+dx, y+dy) in self.objects and
+        #                 self.objects[x+dx, y+dy].outer_colour == 0):
+        #             near_c0 = True
+        #         if (abs(dx) + abs(dy) <= 2 and
+        #                 (x+dx, y+dy) in self.objects and
+        #                 self.objects[x+dx, y+dy].outer_colour == 1):
+        #             near_c1 = True
+
         for (dx, dy) in product(range(-3, 4), range(-3, 4)):
             if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
-                if (abs(dx) + abs(dy) <= 3 and
+                if (abs(dx) + abs(dy) <= 1 and
                         (x+dx, y+dy) in self.objects and
                         self.objects[x+dx, y+dy].outer_colour == 0):
                     near_c0 = True
+            if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
                 if (abs(dx) + abs(dy) <= 2 and
-                        (x+dx, y+dy) in self.objects and
-                        self.objects[x+dx, y+dy].outer_colour == 1):
+                        (dx + x, dy + y) in self.objects and
+                        self.objects[dx + x, dy + y].outer_colour == 1):
                     near_c1 = True
 
-        if near_c0 and near_c1:
-            return -1#1
+        # if near_c0 and near_c1:
+        #     return -1#1
+        
+        if near_c1:
+            return -1
+
         if near_c0:
             return 0#-1
         

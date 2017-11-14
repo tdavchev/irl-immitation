@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import argparse
 from collections import namedtuple
@@ -8,6 +10,7 @@ import img_utils
 from mdp import objectworld
 # from mdp import gridworld
 # from mdp import value_iteration
+import google_drive_upload
 from value_iterationn import find_policy
 from value_iterationn import find_inverted_policy
 from deep_siamese_maxent_irl import *
@@ -15,13 +18,13 @@ from deep_maxent_irl import *
 from maxent_irl import *
 from utils import *
 from lp_irl import *
-
 Step = namedtuple('Step','cur_state action next_state reward done')
 
 
 PARSER = argparse.ArgumentParser(description=None)
-PARSER.add_argument('-hei', '--height', default=10, type=int, help='height of the gridworld')
-PARSER.add_argument('-wid', '--width', default=10, type=int, help='width of the gridworld')
+PARSER.add_argument('-hei', '--height', default=13, type=int, help='height of the gridworld')
+PARSER.add_argument('-wid', '--width', default=13, type=int, help='width of the gridworld')
+PARSER.add_argument('-exp_no', '--exp_no', default=1, type=int, help='experiment number')
 PARSER.add_argument('-g', '--gamma', default=0.9, type=float, help='discount factor')
 PARSER.add_argument('-a', '--act_random', default=0.3, type=float, help='probability of acting randomly')
 PARSER.add_argument('-t', '--n_trajs', default=200, type=int, help='number of expert trajectories')
@@ -45,10 +48,11 @@ L_TRAJ = ARGS.l_traj
 RAND_START = ARGS.rand_start
 LEARNING_RATE = ARGS.learning_rate
 N_ITERS = ARGS.n_iters
+EXP_NO = ARGS.exp_no
 
 
 def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
-         learning_rate, structure):
+         learning_rate, structure, exp_no):
 
     wind = 0.3
     trajectory_length = 8
@@ -67,21 +71,21 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
     trajs = ow.generate_trajectories(N_TRAJS, L_TRAJ, lambda s: policy_gt[s])
     feat_map = ow.feature_matrix(ow.objects, discrete=False)
 
-    rewards_inv = np.array([ow.inverse_reward(s_inv) for s_inv in range(ow.n_states)])
-    policy_inv = find_inverted_policy(ow.n_states, ow.n_actions, ow.transition_probability,
-                            rewards_inv, ow.discount, stochastic=False)
-    trajs_inv = ow.generate_inverse_trajectories(N_TRAJS, L_TRAJ, lambda s_inv: policy_inv[s_inv])
-    # feat_map_inv = ow.inv_feature_matrix(ow.inverted_objects, discrete=False)
+    # rewards_inv = np.array([ow.inverse_reward(s_inv) for s_inv in range(ow.n_states)])
+    # policy_inv = find_inverted_policy(ow.n_states, ow.n_actions, ow.transition_probability,
+    #                         rewards_inv, ow.discount, stochastic=False)
+    # trajs_inv = ow.generate_inverse_trajectories(N_TRAJS, L_TRAJ, lambda s_inv: policy_inv[s_inv])
+    # # feat_map_inv = ow.inv_feature_matrix(ow.inverted_objects, discrete=False)
 
-    feat_map_inv = ow.feature_matrix(ow.objects, discrete=False)
+    # feat_map_inv = ow.feature_matrix(ow.objects, discrete=False)
     # print('LP IRL training ..')
     # rewards_lpirl = lp_irl(ow.transition_probability, policy_gt, gamma=0.3, l1=10, R_max=R_MAX)
-    # print('Max Ent IRL training ..')
-    # rewards_maxent = maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
-    # print('Deep Max Ent IRL training ..')
-    # rewards_deep = deep_maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE, N_ITERS)
-    print('Deep Siamese Max Ent IRL training ..')
-    rewards = deep_siamese_maxent_irl(feat_map, feat_map_inv, ow.transition_probability, GAMMA, trajs, trajs_inv, LEARNING_RATE, N_ITERS)
+    print('Max Ent IRL training ..')
+    rewards_maxent = maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE*2, N_ITERS*2)
+    print('Deep Max Ent IRL training ..')
+    rewards_deep = deep_maxent_irl(feat_map, ow.transition_probability, GAMMA, trajs, LEARNING_RATE, N_ITERS)
+    # print('Deep Siamese Max Ent IRL training ..')
+    # rewards = deep_siamese_maxent_irl(feat_map, feat_map_inv, ow.transition_probability, GAMMA, trajs, trajs_inv, LEARNING_RATE, N_ITERS)
 
     # plots
     plt.figure(figsize=(20,5))
@@ -89,13 +93,15 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
     img_utils.heatmap2d(np.reshape(rewards_gt, (H,W), order='F'), 'Ground Truth', block=False, text=False)
     # plt.subplot(1, 5, 2)
     # img_utils.heatmap2d(np.reshape(rewards_lpirl, (H,W), order='F'), 'LP', block=False, text=False)
-    # plt.subplot(1, 5, 3)
-    # img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Maxent', block=False, text=False)
-    # plt.subplot(1, 5, 4)
-    # img_utils.heatmap2d(np.reshape(rewards_deep, (H,W), order='F'), 'Deep Maxent', block=False, text=False)
-    plt.subplot(1, 5, 5)
-    img_utils.heatmap2d(np.reshape(rewards, (H,W), order='F'), 'Deep Siamese Maxent', block=False, text=False)
-    plt.show()
+    plt.subplot(1, 5, 3)
+    img_utils.heatmap2d(np.reshape(rewards_maxent, (H,W), order='F'), 'Maxent', block=False, text=False)
+    plt.subplot(1, 5, 4)
+    img_utils.heatmap2d(np.reshape(rewards_deep, (H,W), order='F'), 'Deep Maxent', block=False, text=False)
+    #plt.subplot(1, 5, 5)
+    #img_utils.heatmap2d(np.reshape(rewards, (H,W), order='F'), 'Deep Siamese Maxent', block=False, text=False)
+    plt.savefig('irl-immitation_' + str(exp_no) + '.png')
+    # plt.show()
+    #google_drive_upload.upload()
 
 
 
@@ -104,4 +110,4 @@ if __name__ == "__main__":
     if tf.gfile.Exists('/tmp/tensorflow/siamese'):
         tf.gfile.DeleteRecursively('/tmp/tensorflow/siamese')
     tf.gfile.MakeDirs('/tmp/tensorflow/siamese')
-    main(10, 0.9, 15, 3, 20, 50, 0.01, (3, 3))
+    main(13, 0.9, 15, 2, 20, 50, 0.01, (3, 3), EXP_NO)
