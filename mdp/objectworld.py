@@ -84,10 +84,15 @@ class Objectworld(Gridworld):
         # objo = [(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),
         #         (1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0),(1, 0), (0, 1)]
         # listo = [(6, 5)]
-        listo = [(3, 3), (9, 10)] # so x goes down the y axis and y goes towards the x axis ...
+        # listo = [(3, 3), (9, 10)] # so x goes down the y axis and y goes towards the x axis ...
+        listo = [(0, 0), (0, 1), (0, 3), (0, 4), (0, 7), (0, 8), (0, 9), (0, 10), (0, 11), (0, 12), (0, 13),
+                 (1, 0), (1,1), (1,3), (1, 4), (1, 5), (2, 1), (2, 3), (2, 4), (3, 3), (4, 9), (5, 8), (5, 9),
+                 (6, 5), (6, 6), (6, 7), (6, 8), (6, 9), (6, 10), (5, 7)]
 
         
-        objo = [(0, 1), (1, 0)]
+        objo = [(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),
+                (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),
+                (1, 0), (1, 0), (1, 0), (0, 1)]
         for i in range(len(listo)):
             obj = OWObject(objo[i][0], objo[i][1])
             self.objects[listo[i][0], listo[i][1]] = obj
@@ -311,9 +316,12 @@ class Objectworld(Gridworld):
         #                 self.objects[x+dx, y+dy].outer_colour == 1):
         #             near_c1 = True
 
+        # if (x, y) in self.objects:
+        #     return -1
+
         for (dx, dy) in product(range(-3, 4), range(-3, 4)):
             if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
-                if (abs(dx) + abs(dy) <= 1 and
+                if (abs(dx) + abs(dy) <= 0 and
                         (x+dx, y+dy) in self.objects and
                         self.objects[x+dx, y+dy].outer_colour == 0):
                     near_c0 = True
