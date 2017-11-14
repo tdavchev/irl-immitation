@@ -336,7 +336,7 @@ class Objectworld(Gridworld):
                         self.objects[x+dx, y+dy].outer_colour == 0):
                     near_c0 = True
             if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
-                if (abs(dx) + abs(dy) <= 2 and
+                if (abs(dx) + abs(dy) <= 1 and
                         (dx + x, dy + y) in self.objects and
                         self.objects[dx + x, dy + y].outer_colour == 1):
                     near_c1 = True
