@@ -88,9 +88,8 @@ class Objectworld(Gridworld):
         # 13x13
         listo = [(0, 0), (0, 1), (0, 3), (0, 4), (0, 7), (0, 8), (0, 9), (0, 10), (0, 11), (0, 12), (0, 13),
                  (1, 0), (1,1), (1,3), (1, 4), (1, 5), (2, 1), (2, 3), (2, 4), (3, 3), (4, 9), (5, 8), (5, 9),
-                 (6, 5), (6, 6), (6, 7), (6, 8), (6, 9), (6, 10), (5, 7)]
+                 (6, 5), (6, 6), (6, 7), (6, 8), (6, 9), (6, 10), (4, 6)]
 
-        
         objo = [(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),
                 (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),
                 (1, 0), (1, 0), (1, 0), (0, 1)]
@@ -315,6 +314,7 @@ class Objectworld(Gridworld):
         x, y = self.int_to_point(state_int)
         near_c0 = False
         near_c1 = False
+        near_c12 = False
         # for (dx, dy) in product(range(-3, 4), range(-3, 4)):
         #     if 0 <= x + dx < self.grid_size and 0 <= y + dy < self.grid_size:
         #         if (abs(dx) + abs(dy) <= 3 and
@@ -339,7 +339,10 @@ class Objectworld(Gridworld):
                 if (abs(dx) + abs(dy) <= 1 and
                         (dx + x, dy + y) in self.objects and
                         self.objects[dx + x, dy + y].outer_colour == 1):
-                    near_c1 = True
+                    near_c12 = True
+
+        if (x, y) in self.objects and self.objects[x, y].outer_colour == 1:
+            near_c1 = True
 
         # if near_c0 and near_c1:
         #     return -1#1
@@ -347,8 +350,11 @@ class Objectworld(Gridworld):
         if near_c1:
             return -1
 
+        if near_c12:
+            return 0.4#-1
+
         if near_c0:
-            return 0#-1
+            return -0.4
         
         return 1#0
 

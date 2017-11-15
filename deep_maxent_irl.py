@@ -96,7 +96,7 @@ def compute_state_visition_freq(P_a, gamma, trajs, policy, deterministic=True):
   mu = np.zeros([N_STATES, T]) 
 
   for traj in trajs:
-    mu[traj[0, 0], 0] += 1
+    mu[int(traj[0, 0]), 0] += 1
   mu[:,0] = mu[:,0]/len(trajs)
 
   for s in range(N_STATES):
@@ -123,7 +123,7 @@ def find_svf(n_states, trajectories):
 
     for trajectory in trajectories:
         for state, _, _ in trajectory:
-            svf[state] += 1
+            svf[int(state)] += 1
 
     svf /= trajectories.shape[0]
 
@@ -161,7 +161,7 @@ def find_svf(n_states, trajectories):
 
     for trajectory in trajectories:
         for state, _, _ in trajectory:
-            svf[state] += 1
+            svf[int(state)] += 1
 
     svf /= trajectories.shape[0]
 

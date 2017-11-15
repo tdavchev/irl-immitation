@@ -67,10 +67,9 @@ def find_feature_expectations(feature_matrix, trajectories):
     """
 
     feature_expectations = np.zeros(feature_matrix.shape[1])
-
     for trajectory in trajectories:
         for state, _, _ in trajectory:
-            feature_expectations += feature_matrix[state]
+          feature_expectations += feature_matrix[int(state)]
 
     feature_expectations /= trajectories.shape[0]
 
@@ -105,7 +104,7 @@ def find_expected_svf(n_states, n_actions, discount,
 
     start_state_count = np.zeros(n_states)
     for trajectory in trajectories:
-        start_state_count[trajectory[0, 0]] += 1
+      start_state_count[int(trajectory[0, 0])] += 1
     p_start_state = start_state_count/n_trajectories
 
     expected_svf = np.tile(p_start_state, (trajectory_length, 1)).T
