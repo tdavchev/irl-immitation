@@ -43,7 +43,8 @@ class DeepIRLFC:
       img_in = tf.reshape(input_s, shape=[-1, 1, self.n_input, 1])
     with tf.variable_scope(name):
       cnv1 = tf_utils.conv2d(img_in, 2, (2,2))
-      fltn_conv = tf_utils.flatten(cnv1)
+      max_cnv1 = tf.nn.pool(tf.negative(cnv1), [2,2], pooling_type='MAX', padding='SAME')
+      fltn_conv = tf_utils.flatten(max_cnv1)
       # fc1 = tf_utils.fc(input_s, self.n_h1, scope="fc1", activation_fn=tf.nn.elu,
       #   initializer=tf.contrib.layers.variance_scaling_initializer(mode="FAN_IN"))
       fc2 = tf_utils.fc(fltn_conv, self.n_h2, scope="normal_fc2", activation_fn=tf.nn.elu,
