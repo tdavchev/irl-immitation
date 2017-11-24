@@ -402,7 +402,7 @@ class Objectworld(Gridworld):
             return 0
 
         if near_c22:
-            return 0.5
+            return -0.3 #0.5
         
         if near_c1:
             return -1
