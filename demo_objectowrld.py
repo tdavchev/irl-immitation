@@ -73,9 +73,9 @@ def main(grid_size, discount, n_objects, n_colours, n_trajectories, epochs,
 
     # rewards_inv = np.array([ow.inverse_reward(s_inv) for s_inv in range(ow.n_states)])
     # policy_inv = find_inverted_policy(ow.n_states, ow.n_actions, ow.transition_probability,
-    #                         rewards_inv, ow.discount, stochastic=False)
+    #                      rewards_inv, ow.discount, stochastic=False)
     # trajs_inv = ow.generate_inverse_trajectories(N_TRAJS, L_TRAJ, lambda s_inv: policy_inv[s_inv])
-    # # feat_map_inv = ow.inv_feature_matrix(ow.inverted_objects, discrete=False)
+    # feat_map_inv = ow.inv_feature_matrix(ow.inverted_objects, discrete=False)
 
     # feat_map_inv = ow.feature_matrix(ow.objects, discrete=False)
     print('LP IRL training ..')
